@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Tenna Display Controller</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #main-display {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: #ffffff;
+      transition: background-color 0.2s ease;
+    }
+
+    #main-image {
+      max-width: 95vw;
+      max-height: 95vh;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    /* Fullscreen mode for special expressions (e.g., TV static, Color bars) */
+    #main-image.full-screen {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      object-fit: cover;
+    }
+
+    /* Blank White Screen Mode */
+    .blank-white-screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+    }
+
+    /* Pure Black Screen Mode */
+    .blank-black-screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+    }
+
+    /* HUD Floating Overlay */
+    #hud {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 10;
+      backdrop-filter: blur(4px);
+    }
+
+    #hud-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #222;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+      text-align: center;
+      max-width: 110px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #hud-preview-container {
+      width: 70px;
+      height: 70px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #hud-preview {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .black-preview-box {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+    }
+
+    #hud-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn {
+      background: #222222;
+      color: #ffffff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn:active {
+      background: #555555;
+      transform: scale(0.95);
+    }
+
+    /* Settings Button */
+    #settings-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* Modal for Configuration */
+    #settings-modal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 85%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .modal-content h3 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+      color: #111;
+    }
+
+    .modal-content label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .modal-content input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main-display">
+    <img id="main-image" src="117172_2.png" alt="Tenna Display">
+    <div id="blank-screen" class="blank-white-screen"></div>
+    <div id="black-screen" class="blank-black-screen"></div>
+  </div>
+
+  <div id="hud">
+    <div id="hud-title">Tenna Normal</div>
+    <div id="hud-preview-container">
+      <img id="hud-preview" src="117172_2.png" alt="Preview">
+      <div id="hud-black-preview" class="black-preview-box" style="display: none;"></div>
+    </div>
+    <div id="hud-controls">
+      <button class="btn" onclick="prevExpression()">◄</button>
+      <button class="btn" onclick="applyExpression()">OK</button>
+      <button class="btn" onclick="nextExpression()">►</button>
+      <button class="btn" onclick="toggleTalking()">▲</button>
+    </div>
+  </div>
+
+  <div id="settings-btn" onclick="toggleSettings()">⚙</div>
+
+  <div id="settings-modal">
+    <div class="modal-content">
+      <h3>Configuración</h3>
+      <label>
+        Velocidad Animación (ms):
+        <input type="number" id="speed-input" value="180" step="20" min="40">
+      </label>
+      <label>
+        Archivo Audio Habla:
+        <input type="text" id="audio-input" value="tenna-talking.mp3">
+      </label>
+      <button class="btn" onclick="saveSettings()" style="margin-top: 8px;">Guardar y Cerrar</button>
+    </div>
+  </div>
+
+  <audio id="talk-audio" src="tenna-talking.mp3" loop preload="auto"></audio>
+
+  <script>
+    const BLANK_TRANSPARENT = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+    // Complete Expressions List
+    const expressions = [
+      {
+        name: "Tenna Normal",
+        static: "117172_2.png",
+        talking: ["109019_2.png", "124038.png", "109018_2.png", "124039.png"]
+      },
+      {
+        name: "Tenna Contento",
+        static: "124076.png",
+        talking: []
+      },
+      {
+        name: "Molesto",
+        static: "117691.png",
+        talking: ["109023.png", "117705.png"]
+      },
+      {
+        name: "Serio",
+        static: "117742.png",
+        talking: ["117746.png", "117747.png", "117748.png", "117749.png", "117750.png", "117751.png"]
+      },
+      {
+        name: "Sonrojado",
+        static: "118616.png",
+        talking: ["118617.png", "118618.png", "118619.png", "118620.png"]
+      },
+      {
+        name: "Tenna Estresado",
+        static: "120002.png",
+        talking: []
+      },
+      {
+        name: "En blanco (dibujo)",
+        static: "118693.png",
+        talking: []
+      },
+      {
+        name: "Pantalla en blanco",
+        static: BLANK_TRANSPARENT,
+        talking: [],
+        isBlank: true,
+        isWhite: true
+      },
+      {
+        name: "En negro",
+        static: BLANK_TRANSPARENT,
+        talking: [],
+        isBlack: true
+      },
+      {
+        name: "Estática",
+        static: "118699.gif",
+        talking: [],
+        isFullSize: true
+      },
+      {
+        name: "Barras de Color",
+        static: "118717.jpg",
+        talking: [],
+        isFullSize: true
+      }
+    ];
+
+    let currentActiveIndex = 0;
+    let hudSelectedIndex = 0;
+    let isTalking = false;
+    let frameIndex = 0;
+    let animInterval = null;
+    let frameSpeed = 180;
+
+    const mainDisplay = document.getElementById("main-display");
+    const mainImg = document.getElementById("main-image");
+    const blankScreen = document.getElementById("blank-screen");
+    const blackScreen = document.getElementById("black-screen");
+    const hudPreview = document.getElementById("hud-preview");
+    const hudBlackPreview = document.getElementById("hud-black-preview");
+    const hudTitle = document.getElementById("hud-title");
+    const audioEl = document.getElementById("talk-audio");
+
+    /* Update HUD visual state */
+    function updateHud() {
+      const exp = expressions[hudSelectedIndex];
+      hudTitle.textContent = exp.name;
+
+      if (exp.isBlack) {
+        hudPreview.style.display = "none";
+        hudBlackPreview.style.display = "block";
+      } else {
+        hudBlackPreview.style.display = "none";
+        hudPreview.style.display = "block";
+        hudPreview.src = exp.static;
+      }
+    }
+
+    function prevExpression() {
+      hudSelectedIndex = (hudSelectedIndex - 1 + expressions.length) % expressions.length;
+      updateHud();
+    }
+
+    function nextExpression() {
+      hudSelectedIndex = (hudSelectedIndex + 1) % expressions.length;
+      updateHud();
+    }
+
+    /* Update main screen presentation based on active expression */
+    function updateImageDisplay() {
+      const exp = expressions[currentActiveIndex];
+
+      if (exp.isBlank || exp.isWhite) {
+        mainImg.style.display = "none";
+        blackScreen.style.display = "none";
+        blankScreen.style.display = "block";
+        mainDisplay.style.backgroundColor = "#ffffff";
+      } else if (exp.isBlack) {
+        mainImg.style.display = "none";
+        blankScreen.style.display = "none";
+        blackScreen.style.display = "block";
+        mainDisplay.style.backgroundColor = "#000000";
+      } else {
+        blankScreen.style.display = "none";
+        blackScreen.style.display = "none";
+        mainImg.style.display = "block";
+        mainDisplay.style.backgroundColor = "#ffffff";
+
+        if (exp.isFullSize) {
+          mainImg.classList.add("full-screen");
+        } else {
+          mainImg.classList.remove("full-screen");
+        }
+      }
+    }
+
+    /* Apply selected HUD expression to main screen */
+    function applyExpression() {
+      currentActiveIndex = hudSelectedIndex;
+      updateImageDisplay();
+      
+      if (isTalking) {
+        stopTalking();
+      } else if (!expressions[currentActiveIndex].isBlank && !expressions[currentActiveIndex].isBlack) {
+        mainImg.src = expressions[currentActiveIndex].static;
+      }
+    }
+
+    function toggleTalking() {
+      if (isTalking) {
+        stopTalking();
+      } else {
+        startTalking();
+      }
+    }
+
+    function startTalking() {
+      const exp = expressions[currentActiveIndex];
+      const frames = exp.talking;
+      
+      if (!frames || frames.length === 0 || exp.isBlank || exp.isBlack) {
+        return;
+      }
+
+      isTalking = true;
+      frameIndex = 0;
+      
+      mainImg.src = frames[0];
+
+      audioEl.play().catch(err => {
+        console.log("Audio playback waiting for interaction or missing audio file:", err);
+      });
+
+      clearInterval(animInterval);
+      animInterval = setInterval(() => {
+        frameIndex = (frameIndex + 1) % frames.length;
+        mainImg.src = frames[frameIndex];
+      }, frameSpeed);
+    }
+
+    function stopTalking() {
+      isTalking = false;
+      clearInterval(animInterval);
+      
+      audioEl.pause();
+      audioEl.currentTime = 0;
+
+      if (!expressions[currentActiveIndex].isBlank && !expressions[currentActiveIndex].isBlack) {
+        mainImg.src = expressions[currentActiveIndex].static;
+      }
+    }
+
+    /* Settings Modal controls */
+    function toggleSettings() {
+      const modal = document.getElementById("settings-modal");
+      modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+    }
+
+    function saveSettings() {
+      const speedVal = parseInt(document.getElementById("speed-input").value);
+      if (!isNaN(speedVal) && speedVal >= 40) {
+        frameSpeed = speedVal;
+      }
+      const audioVal = document.getElementById("audio-input").value.trim();
+      if (audioVal) {
+        audioEl.src = audioVal;
+      }
+      toggleSettings();
+    }
+
+    window.addEventListener("keydown", (e) => {
+      switch(e.key) {
+        case "ArrowLeft":
+          prevExpression();
+          break;
+        case "ArrowRight":
+          nextExpression();
+          break;
+        case "Enter":
+        case " ":
+          applyExpression();
+          break;
+        case "ArrowUp":
+          toggleTalking();
+          break;
+      }
+    });
+
+    // Audio context unlock on initial user tap
+    document.addEventListener("click", () => {
+      if (audioEl.paused && isTalking) {
+        audioEl.play().catch(() => {});
+      }
+    }, { once: true });
+
+    // Initialize HUD state
+    updateHud();
+  </script>
+</body>
+</html>
