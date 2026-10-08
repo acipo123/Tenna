@@ -165,6 +165,31 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
+    /* Fullscreen Floating Button */
+    #fullscreen-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    #fullscreen-btn:active {
+      background: rgba(200, 200, 200, 0.9);
+      transform: scale(0.95);
+    }
+
     /* Modal for Configuration */
     #settings-modal {
       display: none;
@@ -236,6 +261,7 @@
     </div>
   </div>
 
+  <div id="fullscreen-btn" onclick="toggleFullscreen()" title="Pantalla Completa">⛶</div>
   <div id="settings-btn" onclick="toggleSettings()">⚙</div>
 
   <div id="settings-modal">
@@ -266,11 +292,6 @@
         talking: ["109019_2.png", "124038.png", "109018_2.png", "124039.png"]
       },
       {
-        name: "Tenna Contento",
-        static: "124076.png",
-        talking: []
-      },
-      {
         name: "Molesto",
         static: "117691.png",
         talking: ["109023.png", "117705.png"]
@@ -284,6 +305,11 @@
         name: "Sonrojado",
         static: "118616.png",
         talking: ["118617.png", "118618.png", "118619.png", "118620.png"]
+      },
+      {
+        name: "Tenna Contento",
+        static: "124076.png",
+        talking: []
       },
       {
         name: "Tenna Estresado",
@@ -306,6 +332,7 @@
         name: "En negro",
         static: BLANK_TRANSPARENT,
         talking: [],
+        isBlank: true,
         isBlack: true
       },
       {
@@ -337,6 +364,50 @@
     const hudBlackPreview = document.getElementById("hud-black-preview");
     const hudTitle = document.getElementById("hud-title");
     const audioEl = document.getElementById("talk-audio");
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+
+    /* Fullscreen Toggle with Vendor Prefixes Support */
+    function toggleFullscreen() {
+      const doc = document;
+      const docEl = document.documentElement;
+
+      const isFullScreen = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+
+      if (!isFullScreen) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) { /* Safari / Chrome Mobile */
+          docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) { /* Firefox */
+          docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) { /* IE/Edge */
+          docEl.msRequestFullscreen();
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          doc.msExitFullscreen();
+        }
+      }
+    }
+
+    /* Synchronize Fullscreen Icon based on state change */
+    function updateFullscreenBtnIcon() {
+      const doc = document;
+      const isFullScreen = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+      
+      fullscreenBtn.textContent = isFullScreen ? "✕" : "⛶";
+    }
+
+    document.addEventListener("fullscreenchange", updateFullscreenBtnIcon);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenBtnIcon);
+    document.addEventListener("mozfullscreenchange", updateFullscreenBtnIcon);
+    document.addEventListener("MSFullscreenChange", updateFullscreenBtnIcon);
 
     /* Update HUD visual state */
     function updateHud() {
