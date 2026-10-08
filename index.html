@@ -18,7 +18,7 @@
       height: 100vh;
       background-color: #ffffff;
       overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
     }
 
     #main-display {
@@ -30,8 +30,6 @@
       position: absolute;
       top: 0;
       left: 0;
-      background-color: #ffffff;
-      transition: background-color 0.2s ease;
     }
 
     #main-image {
@@ -41,7 +39,7 @@
       image-rendering: pixelated;
     }
 
-    /* Fullscreen mode for special expressions (e.g., TV static, Color bars) */
+    /* Estilo para imágenes que ocupan toda la pantalla */
     #main-image.full-screen {
       width: 100vw;
       height: 100vh;
@@ -50,7 +48,7 @@
       object-fit: cover;
     }
 
-    /* Blank White Screen Mode */
+    /* Pantalla completamente blanca */
     .blank-white-screen {
       display: none;
       width: 100vw;
@@ -58,15 +56,6 @@
       background-color: #ffffff;
     }
 
-    /* Pure Black Screen Mode */
-    .blank-black-screen {
-      display: none;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000000;
-    }
-
-    /* HUD Floating Overlay */
     #hud {
       position: absolute;
       bottom: 12px;
@@ -79,79 +68,62 @@
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 10;
-      backdrop-filter: blur(4px);
-    }
-
-    #hud-title {
-      font-size: 11px;
-      font-weight: 800;
-      color: #222;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0;
-      text-align: center;
-      max-width: 110px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     #hud-preview-container {
       width: 70px;
       height: 70px;
-      background: #f0f0f0;
+      background: #ffffff;
       border: 1px solid #ccc;
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      position: relative;
     }
 
     #hud-preview {
       max-width: 90%;
       max-height: 90%;
       object-fit: contain;
-      image-rendering: pixelated;
     }
 
-    .black-preview-box {
-      width: 100%;
-      height: 100%;
-      background-color: #000000;
+    #hud-title {
+      font-size: 11px;
+      font-weight: bold;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
     }
 
     #hud-controls {
       display: flex;
-      gap: 5px;
+      gap: 6px;
     }
 
     .btn {
-      background: #222222;
-      color: #ffffff;
+      background: #333;
+      color: #fff;
       border: none;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.05s ease;
     }
 
     .btn:active {
-      background: #555555;
-      transform: scale(0.95);
+      background: #555;
     }
 
-    /* Settings Button */
     #settings-btn {
       position: absolute;
       top: 12px;
       right: 12px;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.8);
       border: 1px solid #ccc;
       border-radius: 50%;
       width: 36px;
@@ -162,35 +134,8 @@
       font-size: 18px;
       cursor: pointer;
       z-index: 10;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    /* Fullscreen Floating Button */
-    #fullscreen-btn {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid #ccc;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      cursor: pointer;
-      z-index: 10;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: background 0.15s ease, transform 0.05s ease;
-    }
-
-    #fullscreen-btn:active {
-      background: rgba(200, 200, 200, 0.9);
-      transform: scale(0.95);
-    }
-
-    /* Modal for Configuration */
     #settings-modal {
       display: none;
       position: absolute;
@@ -198,14 +143,14 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.5);
       z-index: 100;
       justify-content: center;
       align-items: center;
     }
 
     .modal-content {
-      background: #ffffff;
+      background: #fff;
       padding: 20px;
       border-radius: 12px;
       width: 85%;
@@ -213,29 +158,20 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
-
-    .modal-content h3 {
-      margin: 0 0 6px 0;
-      font-size: 16px;
-      color: #111;
     }
 
     .modal-content label {
       font-size: 13px;
-      font-weight: 600;
-      color: #444;
+      font-weight: bold;
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
     .modal-content input {
-      padding: 8px;
+      padding: 6px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 13px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -244,14 +180,12 @@
   <div id="main-display">
     <img id="main-image" src="117172_2.png" alt="Tenna Display">
     <div id="blank-screen" class="blank-white-screen"></div>
-    <div id="black-screen" class="blank-black-screen"></div>
   </div>
 
   <div id="hud">
     <div id="hud-title">Tenna Normal</div>
     <div id="hud-preview-container">
       <img id="hud-preview" src="117172_2.png" alt="Preview">
-      <div id="hud-black-preview" class="black-preview-box" style="display: none;"></div>
     </div>
     <div id="hud-controls">
       <button class="btn" onclick="prevExpression()">◄</button>
@@ -261,7 +195,6 @@
     </div>
   </div>
 
-  <div id="fullscreen-btn" onclick="toggleFullscreen()" title="Pantalla Completa">⛶</div>
   <div id="settings-btn" onclick="toggleSettings()">⚙</div>
 
   <div id="settings-modal">
@@ -269,13 +202,13 @@
       <h3>Configuración</h3>
       <label>
         Velocidad Animación (ms):
-        <input type="number" id="speed-input" value="180" step="20" min="40">
+        <input type="number" id="speed-input" value="180" step="20">
       </label>
       <label>
         Archivo Audio Habla:
         <input type="text" id="audio-input" value="tenna-talking.mp3">
       </label>
-      <button class="btn" onclick="saveSettings()" style="margin-top: 8px;">Guardar y Cerrar</button>
+      <button class="btn" onclick="saveSettings()">Guardar y Cerrar</button>
     </div>
   </div>
 
@@ -284,7 +217,6 @@
   <script>
     const BLANK_TRANSPARENT = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-    // Complete Expressions List
     const expressions = [
       {
         name: "Tenna Normal",
@@ -307,11 +239,6 @@
         talking: ["118617.png", "118618.png", "118619.png", "118620.png"]
       },
       {
-        name: "Tenna Contento",
-        static: "124076.png",
-        talking: []
-      },
-      {
         name: "Tenna Estresado",
         static: "120002.png",
         talking: []
@@ -325,15 +252,7 @@
         name: "Pantalla en blanco",
         static: BLANK_TRANSPARENT,
         talking: [],
-        isBlank: true,
-        isWhite: true
-      },
-      {
-        name: "En negro",
-        static: BLANK_TRANSPARENT,
-        talking: [],
-        isBlank: true,
-        isBlack: true
+        isBlank: true
       },
       {
         name: "Estática",
@@ -356,72 +275,16 @@
     let animInterval = null;
     let frameSpeed = 180;
 
-    const mainDisplay = document.getElementById("main-display");
     const mainImg = document.getElementById("main-image");
     const blankScreen = document.getElementById("blank-screen");
-    const blackScreen = document.getElementById("black-screen");
     const hudPreview = document.getElementById("hud-preview");
-    const hudBlackPreview = document.getElementById("hud-black-preview");
     const hudTitle = document.getElementById("hud-title");
     const audioEl = document.getElementById("talk-audio");
-    const fullscreenBtn = document.getElementById("fullscreen-btn");
 
-    /* Fullscreen Toggle with Vendor Prefixes Support */
-    function toggleFullscreen() {
-      const doc = document;
-      const docEl = document.documentElement;
-
-      const isFullScreen = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
-
-      if (!isFullScreen) {
-        if (docEl.requestFullscreen) {
-          docEl.requestFullscreen();
-        } else if (docEl.webkitRequestFullscreen) { /* Safari / Chrome Mobile */
-          docEl.webkitRequestFullscreen();
-        } else if (docEl.mozRequestFullScreen) { /* Firefox */
-          docEl.mozRequestFullScreen();
-        } else if (docEl.msRequestFullscreen) { /* IE/Edge */
-          docEl.msRequestFullscreen();
-        }
-      } else {
-        if (doc.exitFullscreen) {
-          doc.exitFullscreen();
-        } else if (doc.webkitExitFullscreen) {
-          doc.webkitExitFullscreen();
-        } else if (doc.mozCancelFullScreen) {
-          doc.mozCancelFullScreen();
-        } else if (doc.msExitFullscreen) {
-          doc.msExitFullscreen();
-        }
-      }
-    }
-
-    /* Synchronize Fullscreen Icon based on state change */
-    function updateFullscreenBtnIcon() {
-      const doc = document;
-      const isFullScreen = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
-      
-      fullscreenBtn.textContent = isFullScreen ? "✕" : "⛶";
-    }
-
-    document.addEventListener("fullscreenchange", updateFullscreenBtnIcon);
-    document.addEventListener("webkitfullscreenchange", updateFullscreenBtnIcon);
-    document.addEventListener("mozfullscreenchange", updateFullscreenBtnIcon);
-    document.addEventListener("MSFullscreenChange", updateFullscreenBtnIcon);
-
-    /* Update HUD visual state */
     function updateHud() {
       const exp = expressions[hudSelectedIndex];
+      hudPreview.src = exp.static;
       hudTitle.textContent = exp.name;
-
-      if (exp.isBlack) {
-        hudPreview.style.display = "none";
-        hudBlackPreview.style.display = "block";
-      } else {
-        hudBlackPreview.style.display = "none";
-        hudPreview.style.display = "block";
-        hudPreview.src = exp.static;
-      }
     }
 
     function prevExpression() {
@@ -434,25 +297,15 @@
       updateHud();
     }
 
-    /* Update main screen presentation based on active expression */
     function updateImageDisplay() {
       const exp = expressions[currentActiveIndex];
 
-      if (exp.isBlank || exp.isWhite) {
+      if (exp.isBlank) {
         mainImg.style.display = "none";
-        blackScreen.style.display = "none";
         blankScreen.style.display = "block";
-        mainDisplay.style.backgroundColor = "#ffffff";
-      } else if (exp.isBlack) {
-        mainImg.style.display = "none";
-        blankScreen.style.display = "none";
-        blackScreen.style.display = "block";
-        mainDisplay.style.backgroundColor = "#000000";
       } else {
         blankScreen.style.display = "none";
-        blackScreen.style.display = "none";
         mainImg.style.display = "block";
-        mainDisplay.style.backgroundColor = "#ffffff";
 
         if (exp.isFullSize) {
           mainImg.classList.add("full-screen");
@@ -462,14 +315,13 @@
       }
     }
 
-    /* Apply selected HUD expression to main screen */
     function applyExpression() {
       currentActiveIndex = hudSelectedIndex;
       updateImageDisplay();
       
       if (isTalking) {
         stopTalking();
-      } else if (!expressions[currentActiveIndex].isBlank && !expressions[currentActiveIndex].isBlack) {
+      } else if (!expressions[currentActiveIndex].isBlank) {
         mainImg.src = expressions[currentActiveIndex].static;
       }
     }
@@ -486,7 +338,7 @@
       const exp = expressions[currentActiveIndex];
       const frames = exp.talking;
       
-      if (!frames || frames.length === 0 || exp.isBlank || exp.isBlack) {
+      if (!frames || frames.length === 0 || exp.isBlank) {
         return;
       }
 
@@ -496,7 +348,7 @@
       mainImg.src = frames[0];
 
       audioEl.play().catch(err => {
-        console.log("Audio playback waiting for interaction or missing audio file:", err);
+        console.log("Audio a la espera de interacción del usuario o archivo faltante:", err);
       });
 
       clearInterval(animInterval);
@@ -513,12 +365,11 @@
       audioEl.pause();
       audioEl.currentTime = 0;
 
-      if (!expressions[currentActiveIndex].isBlank && !expressions[currentActiveIndex].isBlack) {
+      if (!expressions[currentActiveIndex].isBlank) {
         mainImg.src = expressions[currentActiveIndex].static;
       }
     }
 
-    /* Settings Modal controls */
     function toggleSettings() {
       const modal = document.getElementById("settings-modal");
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
@@ -526,7 +377,7 @@
 
     function saveSettings() {
       const speedVal = parseInt(document.getElementById("speed-input").value);
-      if (!isNaN(speedVal) && speedVal >= 40) {
+      if (!isNaN(speedVal) && speedVal > 50) {
         frameSpeed = speedVal;
       }
       const audioVal = document.getElementById("audio-input").value.trim();
@@ -536,6 +387,7 @@
       toggleSettings();
     }
 
+    // Control mediante teclado / anillo Bluetooth
     window.addEventListener("keydown", (e) => {
       switch(e.key) {
         case "ArrowLeft":
@@ -554,14 +406,12 @@
       }
     });
 
-    // Audio context unlock on initial user tap
     document.addEventListener("click", () => {
       if (audioEl.paused && isTalking) {
         audioEl.play().catch(() => {});
       }
     }, { once: true });
 
-    // Initialize HUD state
     updateHud();
   </script>
 </body>
