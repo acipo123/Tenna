@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Tenna Display Controller</title>
   <style>
     * {
@@ -11,63 +11,69 @@
       -webkit-user-select: none;
       touch-action: manipulation;
     }
-    body, html {
+    
+    html, body {
       margin: 0;
       padding: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh; /* Forzar dinámico en iOS Safari */
       background-color: #000000;
       overflow: hidden;
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    #main-display {
+    #viewport-container {
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       display: flex;
       justify-content: center;
       align-items: center;
       position: absolute;
       top: 0;
       left: 0;
+      transform-origin: center center;
+      transition: transform 0.2s ease;
+    }
+
+    #main-display {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
       background-color: #000000;
     }
 
     #main-image, #main-video {
-      max-width: 95vw;
-      max-height: 95vh;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Cambia a cover desde la configuración si buscas estirar */
       image-rendering: pixelated;
     }
 
     #main-video {
       display: none;
-      width: 100vw;
-      height: 100vh;
-      max-width: 100vw;
-      max-height: 100vh;
-      object-fit: contain;
     }
 
-    #main-image.full-screen {
-      width: 100vw;
-      height: 100vh;
-      max-width: 100vw;
-      max-height: 100vh;
-      object-fit: cover;
+    /* Ajuste para imágenes fullscreen */
+    #main-image.full-screen, #main-image.fit-cover {
+      object-fit: cover !important;
     }
 
     .blank-white-screen {
       display: none;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background-color: #ffffff;
     }
 
     .blank-black-screen {
       display: none;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background-color: #000000;
     }
 
@@ -75,7 +81,7 @@
     #hud {
       position: absolute;
       top: 50%;
-      right: 12px;
+      right: max(12px, env(safe-area-inset-right));
       transform: translateY(-50%);
       background: rgba(255, 255, 255, 0.92);
       border: 2px solid #333;
@@ -147,8 +153,8 @@
 
     #fullscreen-btn {
       position: absolute;
-      top: 12px;
-      left: 12px;
+      top: max(12px, env(safe-area-inset-top));
+      left: max(12px, env(safe-area-inset-left));
       background: rgba(255, 255, 255, 0.8);
       border: 1px solid #ccc;
       border-radius: 50%;
@@ -164,8 +170,8 @@
 
     #settings-btn {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
       background: rgba(255, 255, 255, 0.8);
       border: 1px solid #ccc;
       border-radius: 50%;
@@ -186,6 +192,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       background: rgba(0,0,0,0.5);
       z-index: 100;
       justify-content: center;
@@ -211,7 +218,7 @@
       gap: 4px;
     }
 
-    .modal-content input {
+    .modal-content input, .modal-content select {
       padding: 6px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -220,11 +227,13 @@
 </head>
 <body>
 
-  <div id="main-display">
-    <img id="main-image" src="117172_2.png" alt="Tenna Display">
-    <video id="main-video" src="tvtime.mp4" playsinline></video>
-    <div id="blank-white" class="blank-white-screen"></div>
-    <div id="blank-black" class="blank-black-screen"></div>
+  <div id="viewport-container">
+    <div id="main-display">
+      <img id="main-image" src="117172_2.png" alt="Tenna Display">
+      <video id="main-video" src="tvtime.mp4" playsinline webkit-playsinline></video>
+      <div id="blank-white" class="blank-white-screen"></div>
+      <div id="blank-black" class="blank-black-screen"></div>
+    </div>
   </div>
 
   <div id="fullscreen-btn" onclick="toggleFullScreen()">⛶</div>
@@ -247,6 +256,23 @@
   <div id="settings-modal">
     <div class="modal-content">
       <h3>Configuración</h3>
+      <label>
+        Escala Display (Para eliminar bordes negros):
+        <select id="scale-select" onchange="updateDisplayScale(this.value)">
+          <option value="1">100% (Normal)</option>
+          <option value="1.1">110% Zoom</option>
+          <option value="1.18">118% Zoom (Recomendado iPhone 16 Pro a 16:9)</option>
+          <option value="1.25">125% Zoom</option>
+          <option value="1.35">135% Zoom</option>
+        </select>
+      </label>
+      <label>
+        Ajuste de Imagen:
+        <select id="fit-select" onchange="updateObjectFit(this.value)">
+          <option value="contain">Ajustar (Contain)</option>
+          <option value="cover">Llenar pantalla (Cover)</option>
+        </select>
+      </label>
       <label>
         Velocidad Animación (ms):
         <input type="number" id="speed-input" value="180" step="20">
@@ -272,7 +298,7 @@
       },
       {
         name: "TV Time",
-        static: "118699.gif", // Muestra preview de estática en el HUD
+        static: "118699.gif",
         isVideo: true,
         videoSrc: "tvtime.mp4",
         talking: []
@@ -339,7 +365,10 @@
     let frameIndex = 0;
     let animInterval = null;
     let frameSpeed = 180;
+    let currentScale = 1;
+    let currentFitMode = "contain";
 
+    const viewportContainer = document.getElementById("viewport-container");
     const mainImg = document.getElementById("main-image");
     const mainVideo = document.getElementById("main-video");
     const blankWhite = document.getElementById("blank-white");
@@ -367,7 +396,6 @@
     function updateImageDisplay() {
       const exp = expressions[currentActiveIndex];
 
-      // Ocultar todos los elementos primero
       mainImg.style.display = "none";
       mainVideo.style.display = "none";
       blankWhite.style.display = "none";
@@ -376,8 +404,9 @@
 
       if (exp.isVideo) {
         mainVideo.style.display = "block";
+        mainVideo.style.objectFit = currentFitMode;
         mainVideo.currentTime = 0;
-        mainVideo.play().catch(err => console.log("Error al reproducir video:", err));
+        mainVideo.play().catch(err => console.log("Error de video:", err));
       } else if (exp.isBlankWhite) {
         blankWhite.style.display = "block";
       } else if (exp.isBlankBlack) {
@@ -385,9 +414,9 @@
       } else {
         mainImg.style.display = "block";
         if (exp.isFullSize) {
-          mainImg.classList.add("full-screen");
+          mainImg.style.objectFit = "cover";
         } else {
-          mainImg.classList.remove("full-screen");
+          mainImg.style.objectFit = currentFitMode;
         }
       }
     }
@@ -423,7 +452,6 @@
 
       isTalking = true;
       frameIndex = 0;
-      
       mainImg.src = frames[0];
 
       audioEl.play().catch(err => console.log("Audio a la espera:", err));
@@ -446,6 +474,16 @@
       if (!exp.isBlankWhite && !exp.isBlankBlack && !exp.isVideo) {
         mainImg.src = exp.static;
       }
+    }
+
+    function updateDisplayScale(scaleVal) {
+      currentScale = parseFloat(scaleVal);
+      viewportContainer.style.transform = `scale(${currentScale})`;
+    }
+
+    function updateObjectFit(fitVal) {
+      currentFitMode = fitVal;
+      updateImageDisplay();
     }
 
     function toggleFullScreen() {
@@ -481,7 +519,7 @@
       toggleSettings();
     }
 
-    // Controles por teclado / Anillo Bluetooth
+    // Teclado / Anillo Bluetooth
     window.addEventListener("keydown", (e) => {
       switch(e.key) {
         case "ArrowLeft":
@@ -510,3 +548,4 @@
   </script>
 </body>
 </html>
+
