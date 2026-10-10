@@ -73,13 +73,13 @@
       background-color: #000000;
     }
 
-    /* HUD Ultra Compacto y pegado a la extrema derecha */
+    /* HUD Arrastrable y personalizable */
     #hud {
       position: absolute;
       top: 50%;
-      right: max(4px, env(safe-area-inset-right));
+      right: 10px;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid #444;
       border-radius: 8px;
       padding: 4px 3px;
@@ -90,7 +90,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       z-index: 10;
       width: 54px;
+      touch-action: none; /* Permite arrastrar libremente con el dedo sin hacer scroll */
+      cursor: grab;
       transition: opacity 0.3s ease;
+    }
+
+    #hud:active {
+      cursor: grabbing;
     }
 
     #hud.hidden-hud {
@@ -276,6 +282,15 @@
         </select>
       </label>
       <label>
+        Tamaño del HUD:
+        <select id="hud-size-select" onchange="updateHudScale(this.value)">
+          <option value="0.7">Muy Pequeño (70%)</option>
+          <option value="0.85" selected>Pequeño (85%)</option>
+          <option value="1">Normal (100%)</option>
+          <option value="1.2">Grande (120%)</option>
+        </select>
+      </label>
+      <label>
         Panel HUD en Pantalla:
         <select id="hud-visibility-select" onchange="toggleHudVisibility(this.value)">
           <option value="show" selected>Visible</option>
@@ -376,6 +391,7 @@
     let frameSpeed = 180;
     let currentScale = 2.1;
     let currentFitMode = "contain";
+    let hudScale = 0.85;
 
     const viewportContainer = document.getElementById("viewport-container");
     const mainImg = document.getElementById("main-image");
@@ -388,6 +404,49 @@
     const audioEl = document.getElementById("talk-audio");
 
     viewportContainer.style.transform = `scale(${currentScale})`;
+    hudEl.style.transform = `scale(${hudScale})`;
+    hudEl.style.transformOrigin = "top right";
+
+    // --- SISTEMA DE ARRASTRE TÁCTIL (DRAG & DROP) PARA EL HUD ---
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    hudEl.addEventListener("pointerdown", (e) => {
+      // Solo iniciar arrastre si se toca el fondo del HUD o el título (evita interferir con los botones de control)
+      if (e.target.tagName === "BUTTON") return;
+      
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+
+      const rect = hudEl.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      // Convertir posición a absolute para mover libremente
+      hudEl.style.right = "auto";
+      hudEl.style.left = initialLeft + "px";
+      hudEl.style.top = initialTop + "px";
+      hudEl.style.transform = `scale(${hudScale})`;
+
+      hudEl.setPointerCapture(e.pointerId);
+    });
+
+    hudEl.addEventListener("pointermove", (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      hudEl.style.left = (initialLeft + dx) + "px";
+      hudEl.style.top = (initialTop + dy) + "px";
+    });
+
+    hudEl.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      try {
+        hudEl.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    });
 
     function updateHud() {
       const exp = expressions[hudSelectedIndex];
@@ -496,6 +555,11 @@
     function updateObjectFit(fitVal) {
       currentFitMode = fitVal;
       updateImageDisplay();
+    }
+
+    function updateHudScale(scaleVal) {
+      hudScale = parseFloat(scaleVal);
+      hudEl.style.transform = `scale(${hudScale})`;
     }
 
     function toggleHudVisibility(val) {
