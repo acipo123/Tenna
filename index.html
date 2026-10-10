@@ -18,7 +18,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background-color: #ffffff; /* Fondo cambiado a blanco */
+      background-color: #ffffff;
       overflow: hidden;
       font-family: system-ui, -apple-system, sans-serif;
     }
@@ -35,7 +35,7 @@
       left: 0;
       transform-origin: center center;
       transition: transform 0.2s ease;
-      background-color: #ffffff; /* Fondo cambiado a blanco */
+      background-color: #ffffff;
     }
 
     #main-display {
@@ -45,13 +45,13 @@
       justify-content: center;
       align-items: center;
       position: relative;
-      background-color: #ffffff; /* Fondo cambiado a blanco */
+      background-color: #ffffff;
     }
 
     #main-image, #main-video {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Utiliza contain con fondo blanco para que las barras sean blancas */
+      object-fit: contain; /* Se actualizará dinámicamente según la configuración */
       image-rendering: pixelated;
     }
 
@@ -264,8 +264,15 @@
           <option value="1">100% (Normal)</option>
           <option value="1.4">140% Zoom</option>
           <option value="1.8">180% Zoom</option>
-          <option value="2.1" selected>210% Zoom (Recomendado)</option>
+          <option value="2.1" selected>210% Zoom</option>
           <option value="2.5">250% Zoom Máximo</option>
+        </select>
+      </label>
+      <label>
+        Ajuste de Imagen:
+        <select id="fit-select" onchange="updateObjectFit(this.value)">
+          <option value="contain" selected>Ajustar (Contain - Franjas blancas)</option>
+          <option value="cover">Llenar pantalla (Cover)</option>
         </select>
       </label>
       <label>
@@ -368,6 +375,7 @@
     let animInterval = null;
     let frameSpeed = 180;
     let currentScale = 2.1;
+    let currentFitMode = "contain";
 
     const viewportContainer = document.getElementById("viewport-container");
     const mainImg = document.getElementById("main-image");
@@ -408,6 +416,7 @@
 
       if (exp.isVideo) {
         mainVideo.style.display = "block";
+        mainVideo.style.objectFit = currentFitMode;
         mainVideo.currentTime = 0;
         mainVideo.play().catch(err => console.log("Error de video:", err));
       } else if (exp.isBlankWhite) {
@@ -416,6 +425,11 @@
         blankBlack.style.display = "block";
       } else {
         mainImg.style.display = "block";
+        if (exp.isFullSize) {
+          mainImg.style.objectFit = "cover";
+        } else {
+          mainImg.style.objectFit = currentFitMode;
+        }
       }
     }
 
@@ -477,6 +491,11 @@
     function updateDisplayScale(scaleVal) {
       currentScale = parseFloat(scaleVal);
       viewportContainer.style.transform = `scale(${currentScale})`;
+    }
+
+    function updateObjectFit(fitVal) {
+      currentFitMode = fitVal;
+      updateImageDisplay();
     }
 
     function toggleHudVisibility(val) {
