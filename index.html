@@ -17,7 +17,7 @@
       padding: 0;
       width: 100vw;
       height: 100vh;
-      height: 100dvh; /* Forzar dinámico en iOS Safari */
+      height: 100dvh;
       background-color: #000000;
       overflow: hidden;
       font-family: system-ui, -apple-system, sans-serif;
@@ -35,6 +35,7 @@
       left: 0;
       transform-origin: center center;
       transition: transform 0.2s ease;
+      background-color: #000000;
     }
 
     #main-display {
@@ -50,17 +51,12 @@
     #main-image, #main-video {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Cambia a cover desde la configuración si buscas estirar */
+      object-fit: cover; /* Forzado a cubrir todo el espacio */
       image-rendering: pixelated;
     }
 
     #main-video {
       display: none;
-    }
-
-    /* Ajuste para imágenes fullscreen */
-    #main-image.full-screen, #main-image.fit-cover {
-      object-fit: cover !important;
     }
 
     .blank-white-screen {
@@ -255,22 +251,15 @@
 
   <div id="settings-modal">
     <div class="modal-content">
-      <h3>Configuración</h3>
+      <h3>Configuración de Pantalla</h3>
       <label>
-        Escala Display (Para eliminar bordes negros):
+        Zoom / Extender Imagen:
         <select id="scale-select" onchange="updateDisplayScale(this.value)">
           <option value="1">100% (Normal)</option>
-          <option value="1.1">110% Zoom</option>
-          <option value="1.18">118% Zoom (Recomendado iPhone 16 Pro a 16:9)</option>
-          <option value="1.25">125% Zoom</option>
-          <option value="1.35">135% Zoom</option>
-        </select>
-      </label>
-      <label>
-        Ajuste de Imagen:
-        <select id="fit-select" onchange="updateObjectFit(this.value)">
-          <option value="contain">Ajustar (Contain)</option>
-          <option value="cover">Llenar pantalla (Cover)</option>
+          <option value="1.2">120% Zoom</option>
+          <option value="1.4" selected>140% Zoom (Llena Monitor)</option>
+          <option value="1.6">160% Zoom</option>
+          <option value="1.8">180% Zoom</option>
         </select>
       </label>
       <label>
@@ -365,8 +354,7 @@
     let frameIndex = 0;
     let animInterval = null;
     let frameSpeed = 180;
-    let currentScale = 1;
-    let currentFitMode = "contain";
+    let currentScale = 1.4; // Por defecto arrancamos con un zoom de 140% para ocultar bordes de iOS
 
     const viewportContainer = document.getElementById("viewport-container");
     const mainImg = document.getElementById("main-image");
@@ -376,6 +364,9 @@
     const hudPreview = document.getElementById("hud-preview");
     const hudTitle = document.getElementById("hud-title");
     const audioEl = document.getElementById("talk-audio");
+
+    // Inicializar escala por defecto en el DOM
+    viewportContainer.style.transform = `scale(${currentScale})`;
 
     function updateHud() {
       const exp = expressions[hudSelectedIndex];
@@ -404,7 +395,6 @@
 
       if (exp.isVideo) {
         mainVideo.style.display = "block";
-        mainVideo.style.objectFit = currentFitMode;
         mainVideo.currentTime = 0;
         mainVideo.play().catch(err => console.log("Error de video:", err));
       } else if (exp.isBlankWhite) {
@@ -413,11 +403,6 @@
         blankBlack.style.display = "block";
       } else {
         mainImg.style.display = "block";
-        if (exp.isFullSize) {
-          mainImg.style.objectFit = "cover";
-        } else {
-          mainImg.style.objectFit = currentFitMode;
-        }
       }
     }
 
@@ -481,11 +466,6 @@
       viewportContainer.style.transform = `scale(${currentScale})`;
     }
 
-    function updateObjectFit(fitVal) {
-      currentFitMode = fitVal;
-      updateImageDisplay();
-    }
-
     function toggleFullScreen() {
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (document.documentElement.requestFullscreen) {
@@ -519,7 +499,7 @@
       toggleSettings();
     }
 
-    // Teclado / Anillo Bluetooth
+    // Controles por Teclado / Anillo Bluetooth
     window.addEventListener("keydown", (e) => {
       switch(e.key) {
         case "ArrowLeft":
@@ -548,4 +528,3 @@
   </script>
 </body>
 </html>
-
