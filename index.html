@@ -18,7 +18,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background-color: #000000;
+      background-color: #ffffff; /* Fondo cambiado a blanco */
       overflow: hidden;
       font-family: system-ui, -apple-system, sans-serif;
     }
@@ -35,7 +35,7 @@
       left: 0;
       transform-origin: center center;
       transition: transform 0.2s ease;
-      background-color: #000000;
+      background-color: #ffffff; /* Fondo cambiado a blanco */
     }
 
     #main-display {
@@ -45,13 +45,13 @@
       justify-content: center;
       align-items: center;
       position: relative;
-      background-color: #000000;
+      background-color: #ffffff; /* Fondo cambiado a blanco */
     }
 
     #main-image, #main-video {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Forzado a cubrir todo el espacio */
+      object-fit: contain; /* Utiliza contain con fondo blanco para que las barras sean blancas */
       image-rendering: pixelated;
     }
 
@@ -90,6 +90,12 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       z-index: 10;
       width: 82px;
+      transition: opacity 0.3s ease;
+    }
+
+    #hud.hidden-hud {
+      opacity: 0;
+      pointer-events: none;
     }
 
     #hud-preview-container {
@@ -253,13 +259,20 @@
     <div class="modal-content">
       <h3>Configuración de Pantalla</h3>
       <label>
-        Zoom / Extender Imagen:
+        Zoom / Escala de Pantalla:
         <select id="scale-select" onchange="updateDisplayScale(this.value)">
           <option value="1">100% (Normal)</option>
-          <option value="1.2">120% Zoom</option>
-          <option value="1.4" selected>140% Zoom (Llena Monitor)</option>
-          <option value="1.6">160% Zoom</option>
+          <option value="1.4">140% Zoom</option>
           <option value="1.8">180% Zoom</option>
+          <option value="2.1" selected>210% Zoom (Recomendado)</option>
+          <option value="2.5">250% Zoom Máximo</option>
+        </select>
+      </label>
+      <label>
+        Panel HUD en Pantalla:
+        <select id="hud-visibility-select" onchange="toggleHudVisibility(this.value)">
+          <option value="show" selected>Visible</option>
+          <option value="hide">Ocultar (Para Cosplay)</option>
         </select>
       </label>
       <label>
@@ -354,18 +367,18 @@
     let frameIndex = 0;
     let animInterval = null;
     let frameSpeed = 180;
-    let currentScale = 1.4; // Por defecto arrancamos con un zoom de 140% para ocultar bordes de iOS
+    let currentScale = 2.1;
 
     const viewportContainer = document.getElementById("viewport-container");
     const mainImg = document.getElementById("main-image");
     const mainVideo = document.getElementById("main-video");
     const blankWhite = document.getElementById("blank-white");
     const blankBlack = document.getElementById("blank-black");
+    const hudEl = document.getElementById("hud");
     const hudPreview = document.getElementById("hud-preview");
     const hudTitle = document.getElementById("hud-title");
     const audioEl = document.getElementById("talk-audio");
 
-    // Inicializar escala por defecto en el DOM
     viewportContainer.style.transform = `scale(${currentScale})`;
 
     function updateHud() {
@@ -466,6 +479,14 @@
       viewportContainer.style.transform = `scale(${currentScale})`;
     }
 
+    function toggleHudVisibility(val) {
+      if (val === "hide") {
+        hudEl.classList.add("hidden-hud");
+      } else {
+        hudEl.classList.remove("hidden-hud");
+      }
+    }
+
     function toggleFullScreen() {
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (document.documentElement.requestFullscreen) {
@@ -499,7 +520,6 @@
       toggleSettings();
     }
 
-    // Controles por Teclado / Anillo Bluetooth
     window.addEventListener("keydown", (e) => {
       switch(e.key) {
         case "ArrowLeft":
