@@ -90,7 +90,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       z-index: 10;
       width: 54px;
-      touch-action: none; /* Permite arrastrar libremente con el dedo sin hacer scroll */
+      touch-action: none;
       cursor: grab;
       transition: opacity 0.3s ease;
     }
@@ -302,7 +302,7 @@
         <input type="number" id="speed-input" value="180" step="20">
       </label>
       <label>
-        Archivo Audio Habla:
+        Archivo Audio Habla Default:
         <input type="text" id="audio-input" value="tenna-talking.mp3">
       </label>
       <button class="btn" onclick="saveSettings()">Guardar y Cerrar</button>
@@ -319,6 +319,12 @@
         name: "Tenna Normal",
         static: "117172_2.png",
         talking: ["109019_2.png", "124038.png", "109018_2.png", "124039.png"]
+      },
+      {
+        name: "Tenna Risa",
+        static: "129836.png",
+        customAudio: "tenna-risas.mp3", // Archivo de audio específico para esta expresión
+        talking: []
       },
       {
         name: "TV Time",
@@ -412,7 +418,6 @@
     let startX, startY, initialLeft, initialTop;
 
     hudEl.addEventListener("pointerdown", (e) => {
-      // Solo iniciar arrastre si se toca el fondo del HUD o el título (evita interferir con los botones de control)
       if (e.target.tagName === "BUTTON") return;
       
       isDragging = true;
@@ -423,7 +428,6 @@
       initialLeft = rect.left;
       initialTop = rect.top;
 
-      // Convertir posición a absolute para mover libremente
       hudEl.style.right = "auto";
       hudEl.style.left = initialLeft + "px";
       hudEl.style.top = initialTop + "px";
@@ -498,10 +502,11 @@
       
       if (isTalking) {
         stopTalking();
-      } else if (!expressions[currentActiveIndex].isBlankWhite && 
-                 !expressions[currentActiveIndex].isBlankBlack && 
-                 !expressions[currentActiveIndex].isVideo) {
-        mainImg.src = expressions[currentActiveIndex].static;
+      } else {
+        const exp = expressions[currentActiveIndex];
+        if (!exp.isBlankWhite && !exp.isBlankBlack && !exp.isVideo) {
+          mainImg.src = exp.static;
+        }
       }
     }
 
@@ -515,23 +520,37 @@
 
     function startTalking() {
       const exp = expressions[currentActiveIndex];
-      const frames = exp.talking;
       
-      if (!frames || frames.length === 0 || exp.isBlankWhite || exp.isBlankBlack || exp.isVideo) {
+      if (exp.isBlankWhite || exp.isBlankBlack || exp.isVideo) {
         return;
       }
 
       isTalking = true;
-      frameIndex = 0;
-      mainImg.src = frames[0];
+      
+      // Asignar audio específico de la expresión si lo tiene, o usar el default
+      const defaultAudioSrc = document.getElementById("audio-input").value.trim() || "tenna-talking.mp3";
+      const targetAudio = exp.customAudio || defaultAudioSrc;
+      
+      if (audioEl.getAttribute("src") !== targetAudio) {
+        audioEl.src = targetAudio;
+      }
 
       audioEl.play().catch(err => console.log("Audio a la espera:", err));
 
-      clearInterval(animInterval);
-      animInterval = setInterval(() => {
-        frameIndex = (frameIndex + 1) % frames.length;
-        mainImg.src = frames[frameIndex];
-      }, frameSpeed);
+      const frames = exp.talking;
+      if (frames && frames.length > 0) {
+        frameIndex = 0;
+        mainImg.src = frames[0];
+
+        clearInterval(animInterval);
+        animInterval = setInterval(() => {
+          frameIndex = (frameIndex + 1) % frames.length;
+          mainImg.src = frames[frameIndex];
+        }, frameSpeed);
+      } else {
+        // Si es estática pero se presiona ▲ (hablar/reproducir sonido), mantiene la imagen fija con su audio
+        mainImg.src = exp.static;
+      }
     }
 
     function stopTalking() {
@@ -540,6 +559,12 @@
       
       audioEl.pause();
       audioEl.currentTime = 0;
+
+      // Restaurar audio default por si acaso
+      const defaultAudioSrc = document.getElementById("audio-input").value.trim() || "tenna-talking.mp3";
+      if (audioEl.getAttribute("src") !== defaultAudioSrc) {
+        audioEl.src = defaultAudioSrc;
+      }
 
       const exp = expressions[currentActiveIndex];
       if (!exp.isBlankWhite && !exp.isBlankBlack && !exp.isVideo) {
@@ -597,7 +622,7 @@
         frameSpeed = speedVal;
       }
       const audioVal = document.getElementById("audio-input").value.trim();
-      if (audioVal) {
+      if (audioVal && !expressions[currentActiveIndex].customAudio) {
         audioEl.src = audioVal;
       }
       toggleSettings();
